@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset = "utf-8">
+		<title>D3 page template</title>
+		<script type="text/javascript" src="./d3/d3.v3.js"></script>
+		<style type="text/css">
+			div.bar {
+				display: inline-block;
+				width: 20px;
+				height: 75px;
+				background-color: blue;
+				margin-right: 2px;
+			}
+			svg text{
+				pointer-events:none;
+			}
+			rect:hover {   // transition by CSS
+				fill:orange;
+				-moz-transition:all 0.3s;
+				-o-transition:all 0.3s;
+				-webkit-transtion:all 0.3s;
+				transition:0.3s;
+			}
+			.axis path,
+			.axis line {
+				fill:none;
+				stroke:black;
+				stroke-width:2px;
+				shape-rendering: crispEdges;
+			}
+			.axis text{
+				font-family: sans-serif;
+				font-size: 11px;
+				/*fill: olive;*/
+			}
+		</style>
+	</head>
+	<body>
+		<!-- <p>Click on mouse to add</p> -->
+		<p id = "add">Add new </p>
+		<p id = "remove">Remove data</p>
+		<script type="text/javascript">
+				
+				// data for spots
+				// var dataset = [];
+				// for (i =0 ; i < 20; i++)
+				// {
+				// 	var newnumber1 = Math.round(Math.random() * 500);
+				// 	var newnumber2 = Math.round(Math.random() * 300);
+				// 	dataset[i] = ([newnumber1, newnumber2]);
+				// }
+
+
+				// data for bars
+				// var dataset = [];
+				var dataset  = []
+				// var number
+				for (i =0 ; i < 3; i++)
+				{
+					var number = Math.round(Math.random() * 500 + 0.01);
+					dataset.push({
+						key:i,
+						value:number
+					});
+					
+				}
+
+
+
+				// var dataset = [ 
+				// 				{ key: 0, value: },
+				// 				{ key: 1, value: 10},
+				// 				{ key: 2, value: 13},
+				// 				{ key: 3, value: 19},
+				// 				{ key: 4, value: 21},
+				// 				{ key: 5, value: 25},
+				// 				{ key: 6, value: 18},
+				// 				{ key: 7, value: 20},
+				// ];
+				var key = function (d) {
+					return d.key;
+				}
+
+				// var dataset = [
+				// 				[5,20],
+				// 				[30,84],
+				// 				[12,45],
+				// 			  ];
+
+				// d3.select("body").selectAll("div")
+				// 	.data(dataset)
+				// 	.enter()
+				// 	.append("div")
+				// 	.attr("class","bar")
+				// 	.style("height", function (d) {
+				// 		return d*5 + "px";
+				// 	})
+				// 	.style("background-color", function(d){   // function(d) iterately pick one data at each time
+				// 		// if (d*5 < 100) {
+				// 			var ran_rcol = Math.round(Math.random()* 255);
+				// 			var ran_gcol = Math.round(Math.random()* 255);
+				// 			var ran_bcol = Math.round(Math.random()* 255);
+				// 			return "rgb(" +[ran_rcol,ran_gcol,ran_bcol] + "0";
+
+				// 	});
+				var padding = 30;
+				var svg_w = 400;
+				var svg_h = 300;
+				svg = d3.select("body")
+						.append("svg")
+						.attr("id", "SVG")
+						.attr("width", svg_w)
+						.attr("height", svg_h);    //define var svg for later easy-reference
+
+				// svg.append("clipPath")
+				// 	.attr("id","chart-area")
+				// 	.append("rect")
+
+				// 	.attr("x", padding)
+				// 	.attr("y", padding)
+				// 	.attr("width", svg_w - padding*3)
+				// 	.attr("height", svg_h - padding*2);
+
+				var xScale = d3.scale.ordinal()
+							.domain(d3.range(dataset.length))
+							.rangeRoundBands([0, svg_w], 0.05);
+				var yScale = d3.scale.linear()
+							.domain([0, d3.max(dataset, function(d){
+								return d.value;
+							})])
+							.range([svg_h - padding, padding]);
+
+				// var xScale = d3.scale.linear()
+				// 				.domain([0, d3.max(dataset, function (d) {
+				// 					return d[0];
+				// 				})])
+				// 				.range ([padding, svg_w - padding * 2]);
+				// var yScale = d3.scale.linear()
+				// 				.domain([0, d3.max(dataset, function (d) {
+				// 					return d[1];
+				// 				})])
+				// 				.range([svg_h - padding, padding]);
+				// var rScale = d3.scale.linear()
+				// 				.domain([0, d3.max(dataset, function (d) {
+				// 					return d[1];
+				// 				})])
+				// 				.range([2,8]);
+
+				// var xAxis = d3.svg.axis()
+				// 				.scale(xScale)
+				// 				.orient("bottom")
+				// 				.ticks(5);
+
+				// var yAxis = d3.svg.axis()
+				// 				.scale(yScale)
+				// 				.orient("left")
+				// 				.ticks(5);
+
+				// svg.append("g")
+				// 	.attr("class", "x axis")
+				// 	.attr("transform", "translate(0, " + (svg_h - padding) + ")")
+				// 	.call(xAxis);
+
+				// svg.append("g")
+				// 	.attr("class", "y axis")
+				// 	.attr("transform", "translate(" + padding + ", 0)")
+				// 	.call(yAxis);
+
+				//''' add circles'''
+				// var circles = svg.selectAll("circle")  // a easy reference to build a svg: as defined previously
+				// 			.data(dataset)
+				// 			.enter()
+				// 			.append("circle");
+
+				// circles.attr("cx", function (d, i) {
+				// 			return (i * 50) + 25;
+				// 		})
+				// 		.attr("cy", svg_h/2)
+				// 		.attr("r", function(d) {
+				// 			 return 0.8*d;
+				// 		})
+				// 		.attr("fill", function (d) {
+				// 			if (d > 15) {
+				// 				return "yellow";
+				// 			}
+				// 			else {
+				// 				return "red";
+				// 			}
+				// 		})
+				// 		.attr("stroke", "orange")
+				// 		.attr("stroke-width", 3)
+				// 		.attr("opacity", function (d) {
+				// 			return d/30;
+				// 		});
+
+			    // add dots
+				// var barPadding = 1;
+				// svg.append("g")
+				// 	.attr("id", "circles")
+				// 	.attr("clip-path", "url(#chart-area")
+				// 	.selectAll("circle")
+				// 	.data(dataset)
+				// 	.enter()
+				// 	.append("circle")
+				// 	.attr({
+				// 		cx : function (d) { return xScale(d[0]);},
+				// 		cy : function (d) { return yScale(d[1]);},
+				// 		r: function (d) { return rScale(d[1]);},
+				// 		fill:"blue",
+				// 		opacity: 0.5,
+				// 		// stroke:"blue"
+				// 	});
+
+				//  // add text on circles
+				// svg.selectAll("text")
+				// 	.data(dataset)
+				// 	.enter()
+				// 	.append("text")
+				// 	.attr({
+				// 		x:function (d) { return xScale(d[0]);},
+				// 		y:function (d) { return yScale(d[1]);},
+				// 	})
+				// 	.text (function (d) {
+				// 		return "(" + d[0]  + "," + d[1] + ")";
+				// 	})
+				// 	.attr("font-size", "10px")
+				// 	.attr("font-family", "sans-serif")
+				// 	.attr("fill","black");
+
+				// svg.selectAll("g").selectAll("rect").data(dataset,key);
+				// ''' add datatext on bars'''
+				var groups = svg.selectAll("g")
+							.data(dataset, key);
+				var grpenter = groups.enter();
+				grpenter.append("g")
+					.append("rect")
+					.attr({
+						x:function (d,i) { return xScale(i);},
+						y: function (d) {return yScale(d.value);},
+						height: function (d) {return svg_h - yScale(d.value);},
+						fill: function (d) 
+							{ return "rgb(0,0," + Math.round( yScale(d.value)*10) + ")";},
+						opacity: function(d) { return (svg_h - yScale(d.value))/500+0.2;},
+						id: function (d,i) {return "rect "+i;}
+					})
+					.attr("width", xScale.rangeBand())
+					.on("click", function() {
+						sortBars();
+					});
+
+					
+				groups.append("text")
+					.text(function (d) {
+						return Math.round(d.value);
+					})
+					.attr({
+						x:function (d,i) { 
+							return xScale(i) + xScale.rangeBand()/2;
+							},
+						y:function (d) { 
+							return yScale(d.value) + 15;
+						},
+						fill: "white",
+						width: xScale.rangeBand(),
+						"text-anchor":"middle"
+					})
+					.attr("font-size", "12px")
+					.attr("font-family", "sans-serif");						
+						
+						
+				// d3.select("body").append("p").text("new paragraph");
+				// d3.selectAll("g")		// althougn can bind visual translation to "g", but pay attention to the graphic layer
+				// 	.selectAll("rect")
+				// 	.on("mouseover", function() {
+				// 		d3.select(this)
+				// 			.attr("fill","orange");
+				// 	})
+				// 	.on("mouseout", function(d) {
+				// 		d3.select(this)
+				// 			.transition()
+				// 			.duration(200)
+				// 			.attr({
+				// 			fill: function (d) 
+				// 				{ return "rgb(0,0," + Math.round( yScale(d.value)*10) + ")";},
+				// 			opacity: function(d) { return (svg_h - yScale(d.value))/500+0.2;},
+				// 			// id: function (d,i) {return "rect "+i;}
+				// 		})
+				// 	})
+
+					
+
+				d3.selectAll("p")
+					.on("click", function () 
+					{	
+						var paragraphID = d3.select(this)
+							.attr("id");  // this is select attribute id, not giving value
+
+						if (paragraphID == "add") {
+							// Add a new value
+							var newnumber = Math.round(Math.random() * 500 + 0.01);
+							var lastkeyvalue = dataset[dataset.length -1].key;
+							console.log(lastkeyvalue);
+							dataset.push({
+								key: lastkeyvalue + 1,
+								value: newnumber
+								});
+						}
+
+						else {
+							dataset.shift();		// then datum < ele:
+						}
+				// 		var dataset = [];
+				// 			for (i =0 ; i < 20; i++)
+				// 			{
+				// 				var newnumber1 = Math.round(Math.random() * 500);
+				// 				var newnumber2 = Math.round(Math.random() * 300);
+				// 				dataset[i] = ([newnumber1, newnumber2]);
+				// 			}
+				// 		// new dataset
+						// var dataset = [];
+						// 	for (i =0 ; i < 10; i++)
+						// 	{
+						// 		var newnumber = Math.round(Math.random() * 500);
+						// 		dataset.push(newnumber) 
+						// 	}
+
+						
+
+						// delete value
+						// dataset.shift();	// pop out the first item in the queue
+
+						xScale.domain(d3.range(dataset.length));
+						yScale.domain([0, d3.max(dataset, function (d) {
+								return d.value;
+							})
+						]);
+
+						var grpenter = svg.selectAll("g")
+											.data(dataset,key)
+											.enter();
+						
+						 // = newgroups.enter();
+
+						// bars = svg.selectAll("rect")
+						// 	.data(dataset, key);
+							
+						var addgroups = grpenter
+									.append("g");
+							
+						addgroups.append("rect")
+							.attr({
+								x: svg_w,
+								y: function (d) {return yScale(d.value);},
+								width: xScale.rangeBand(),
+								height: function (d) {return svg_h - yScale(d.value);},
+								fill: function (d) 
+								{ return "rgb(0,0," + Math.round( yScale(d.value)*10) + ")";},
+								opacity: function(d) { return (svg_h - yScale(d.value))/500+0.2;},
+								id: function (d,i) {return "rect "+i;}
+							})
+							.on("mouseover", function() {
+								d3.select(this)
+								.attr("fill","orange");
+							})
+							.on("mouseout", function(d) {
+								d3.select(this)
+									.transition()
+									.duration(100)
+									.attr({
+									fill: function (d) 
+										{ return "rgb(0,0," + Math.round( yScale(d.value)*10) + ")";},
+									opacity: function(d) { return (svg_h - yScale(d.value))/500+0.2;},
+								})
+							})
+							.on("click", function(){
+									sortBars();
+							});
+
+
+						var grpexit = svg.selectAll("g")
+											.data(dataset,key)
+											.exit();
+						grpexit			// pop out the last item in the "g" quene: "text" and "rect"
+							.transition()
+							.duration(100)
+							.attr("x",-xScale.rangeBand())
+							.remove();
+
+						
+						addgroups
+						// texts = svg.selectAll("text")
+						// 	.data(dataset, function(d) {return d.value;})
+
+						// texts.enter()
+							.append("text")
+							.text(function (d) {return Math.round(d.value);})
+							.attr({
+								x: svg_w,
+								y:function (d) { 
+									return yScale(d.value) + 15;
+								},
+								fill: "white",
+								width: xScale.rangeBand(),
+								"text-anchor":"middle"
+							})
+							.attr("font-size", "12px")
+							.attr("font-family", "sans-serif");
+							
+
+						// texts.exit()
+						// 	.transition()
+						// 	.attr("x",0)
+						// 	.remove();
+
+						// groups
+						// var groups = svg.selectAll("g");
+										// .data(dataset, key);
+
+						svg.selectAll("rect")			// cannot replace by group, since it was the old group and the beginning of the document
+							.data(dataset,key)				// amount data to rect in order to adjust
+							.transition()
+							.duration(500)
+							.attr({
+								x: function (d,i) {
+									return xScale(i);
+								},
+								y: function (d) {
+									return yScale(d.value);
+								},
+								width : xScale.rangeBand(),
+								height: function(d) {
+									return svg_h - yScale(d.value);
+								},
+								fill: function (d) 
+								{ return "rgb(0,0," + Math.round( yScale(d.value)*10) + ")";},
+								opacity: function(d) { return (svg_h - yScale(d.value))/500+0.2;}
+							})
+							
+
+						// yScale.domain = ([0, d3.max(dataset)]);
+						// xScale.domain([0, d3.max(dataset, function (d) { 
+						// 	return d[0];})
+						// // ]);
+						// yScale.domain([0, d3.max(dataset, function (d) { 
+						// 	return d[1];})
+						// ]);
+
+				// 		svg.selectAll("circle")
+				// 			.data(dataset)	// 
+				// 			// .enter()  // enter returns the object array from the dataset
+				// 			// .append("circle")  // append returns circles(shape) that are attached to data one by one
+				// 			.transition()		// only shape has transition method
+				// 			.duration(1000)
+				// 			.each("start", function ()		// tran at beginning
+				// 			{
+				// 				d3.select(this)  // this!
+				// 					.attr("fill", "magenta")
+				// 					.attr("r", 3);
+
+				// 			})
+				// 			.attr({
+				// 				cx : function (d) { return xScale(d[0]);},
+				// 				cy : function (d) { return yScale(d[1]);},
+				// 				r: function (d) { return rScale(d[1]);},
+				// 				fill: function (d) { 
+				// 					return "rgb(0,0," + Math.round(yScale(d[1]) * 10) + ")";},
+				// 				opacity: 0.5,
+				// 				// stroke:"blue"
+				// 			})
+				// 			.each("end", function () {
+				// 				d3.select(this)
+				// 					.transition()
+				// 					// .attr("fill", "black")
+				// 					// .attr("r", 2);
+				// 			});
+
+				// 		svg.select(".x.axis") // update axis needs not redefine svg
+				// 			.transition()
+				// 			.duration(1000)
+				// 			.call(xAxis);
+
+				// 		svg.select(".y.axis")
+				// 			.transition()
+				// 			.duration(1000)
+				// 			.call(yAxis);
+
+						// var groups = svg.selectAll("g")
+							// .data(dataset, key);
+
+						svg.selectAll("g")
+							.selectAll("text")
+							.data(dataset,key)
+							.transition()
+							.delay(100)
+							.duration(1000)
+							.text(function (d) {
+							return Math.round(d.value);
+							})
+							.attr({
+							x:function (d,i) { 
+								return xScale(i) + xScale.rangeBand()/2;
+								},
+							y:function (d) { 
+								return yScale(d.value) + 15;
+							},
+							fill: "white",
+							width: xScale.rangeBand(),
+							'text-anchor':'middle'
+							})
+							// .attr("text-anchor", "right")
+							.attr("font-size", "10px")
+							.attr("font-family", "sans-serif");
+
+				// 		// alert("Hey don't click that!");
+					})
+
+			var sortBars = function() {
+				// var cp = d3.ascending(14, 15);
+				// console.log(cp)
+
+				// svg.selectAll("g")				// why cannot arrange X w/ "g" ?  (i) is within group
+				// must put elements to be sorted within a groups
+				 var order = svg.selectAll("rect")
+			 		       
+			 		// .selectAll("rect")
+						   	.sort(function(a, b) {
+							   
+							   return d3.ascending(a.value, b.value);
+						   	})
+				   .transition()
+				   .duration(1000)
+				   .attr("x", function(d, i) {
+				   		// console.log(d3.select(this));
+				   		// console.log(d3.select(this).x);
+				   		return xScale(i);
+				   });
+
+				// svg.selectAll("g")
+				svg.selectAll("text")
+					.sort(function(a, b) {
+					   return d3.ascending(a.value, b.value);
+				   	})
+				   .transition()
+				   .duration(1000)
+				   .attr({
+				   		x:function(d, i) {
+				   			return xScale(i) + xScale.rangeBand()/2;
+				   		},
+				   		y:function(d,i) {
+				   			return yScale(d.value) + 15 ;
+				   		},
+
+
+						});			
+				};
+		</script>	
+	</body>
+</html>
+
+
